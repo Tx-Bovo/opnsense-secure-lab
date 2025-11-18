@@ -41,7 +41,7 @@ O objetivo deste projeto foi simular a infraestrutura de uma pequena empresa que
 
 O laboratório foi virtualizado inteiramente no **GNS3**.
 
-![Topologia do Projeto](./topology.png)
+![Topologia do Projeto](./images/topology.png)
 
 A topologia segue o modelo de defesa em profundidade:
 * **Edge:** OPNsense atuando como Firewall e Gateway.
