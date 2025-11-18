@@ -70,9 +70,9 @@ Para reduzir a superfície de ataque, a rede foi dividida em zonas lógicas:
 
 | ID | Nome | Subrede | Função |
 | :--- | :--- | :--- | :--- |
-| **10** | `LAN` | `192.168.10.0/24` | Rede de estações de trabalho (Windows 10). Acesso à Internet permitido, acesso à DMZ bloqueado. |
-| **20** | `DMZ` | `192.168.20.0/24` | Rede de serviços expostos (DVWA). Isolada da LAN e MGMT. |
-| **30** | `MGMT` | `192.168.30.0/24` | Rede crítica de gerenciamento. Contém o servidor Zabbix/Grafana. Acessível apenas via VPN ou Console. |
+| **10** | `LAN` | `10.10.10.0/24` | Rede de estações de trabalho (Windows 10). Acesso à Internet permitido, acesso à DMZ bloqueado. |
+| **20** | `DMZ` | `10.10.20.0/24` | Rede de serviços expostos (DVWA). Isolada da LAN e MGMT. |
+| **30** | `MGMT` | `10.10.30.0/24` | Rede crítica de gerenciamento. Contém o servidor Zabbix/Grafana. Acessível apenas via VPN ou Console. |
 
 ### 4.2 Configuração do Firewall (OPNsense)
 As regras de firewall foram aplicadas seguindo o princípio do **menor privilégio**:
