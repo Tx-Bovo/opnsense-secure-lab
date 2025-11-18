@@ -74,12 +74,19 @@ Para reduzir a superfície de ataque, a rede foi dividida em zonas lógicas:
 | **20** | `DMZ` | `10.10.20.0/24` | Rede de serviços expostos (DVWA). Isolada da LAN e MGMT. |
 | **30** | `MGMT` | `10.10.30.0/24` | Rede crítica de gerenciamento. Contém o servidor Zabbix/Grafana. Acessível apenas via VPN ou Console. |
 
-### 4.2 Configuração do Firewall (OPNsense)
-As regras de firewall foram aplicadas seguindo o princípio do **menor privilégio**:
+### 4.2 Configuração e Regras de Firewall (Hardening)
 
-* **Regra Default:** Bloqueio total (`Block All`) entre VLANs.
-* **Exceção 1:** Permitido tráfego da `MGMT` para `LAN` e `DMZ` (para monitoramento e gestão).
-* **Exceção 2:** Bloqueado tráfego da `DMZ` para iniciar conexões com a `LAN` (evita *lateral movement* em caso de comprometimento do DVWA).
+A política de segurança foi desenhada seguindo o princípio do "Least Privilege". O OPNsense implementa o **"Block All" implícito**, e apenas as seguintes conexões são explicitamente permitidas:
+
+| Interface | Ação | Origem | Destino | Porta/Protocolo | Propósito |
+| :--- | :---: | :--- | :--- | :--- | :--- |
+| **DMZ** | 🚫 BLOCK | DMZ Net | LAN Net | Any | **Anti-Pivoting:** Impede que um atacante na DMZ acesse a rede de usuários. |
+| **DMZ** | 🚫 BLOCK | DMZ Net | MGMT Net | Any | **Proteção Crítica:** Impede que um atacante pivote para a rede de monitoramento (Zabbix/Grafana). |
+| **DMZ** | 🚫 BLOCK | DMZ Net | This Firewall | Any | **Gerência Segura:** Impede o acesso à interface administrativa do OPNsense. |
+| **DMZ** | ✅ ALLOW | DMZ Net | WAN Net | Any | Permite acesso à Internet para updates e comunicação externa (tráfego de saída). |
+| **DMZ** | ✅ ALLOW | DMZ Net | This Firewall | 53 (DNS/TCP) | Permite a resolução de nomes de domínio, essencial para o funcionamento dos containers. |
+
+> 🔒 **Resultado:** A DMZ só pode se comunicar com a Internet e com o DNS do Firewall, estando completamente isolada das redes internas.
 
 ### 4.3 Acesso Remoto Seguro (VPN + MFA)
 Foi configurado um servidor **OpenVPN** dentro do OPNsense para acesso administrativo.
