@@ -136,5 +136,5 @@ Este projeto permitiu consolidar conhecimentos em **Defesa Cibernética** e **Ad
 
 ---
 
-**Autor:** [THIAGO COSTA]
+**Autor:** THIAGO COSTA
 *Conecte-se comigo no [LinkedIn](https://www.linkedin.com/in/thiagobovocosta/)*
