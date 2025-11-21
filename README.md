@@ -1,12 +1,12 @@
-# 🛡️ Projeto de Infraestrutura de Segurança (SOC/NOC)
+# 🛡️ Projeto de Infraestrutura e Segurança (NOC)
 
 ![Status](https://img.shields.io/badge/Status-Conclu%C3%ADdo-success?style=for-the-badge&logo=appveyor)
 ![OPNsense](https://img.shields.io/badge/Firewall-OPNsense-orange?style=for-the-badge)
-![Zabbix](https://img.shields.io/badge/Monitoring-Zabbix-red?style=for-the-badge&logo=zabbix)
-![Docker](https://img.shields.io/badge/Container-Docker-blue?style=for-the-badge&logo=docker)
+![Zabbix](https://img.shields.io/badge/Monitoring-Zabbix_7.0_LTS-red?style=for-the-badge&logo=zabbix)
+![Docker](https://img.shields.io/badge/Orchestration-Docker_Compose-blue?style=for-the-badge&logo=docker)
 ![GNS3](https://img.shields.io/badge/Lab-GNS3-lightgrey?style=for-the-badge)
 
-> Um laboratório prático de implementação de segurança de rede, segmentação, VPN com MFA e monitoramento contínuo.
+> Um laboratório prático de implementação de segurança de rede, segmentação, VPN com MFA e monitoramento contínuo (NOC).
 
 ---
 
@@ -17,9 +17,9 @@
 - [3. Ferramentas Utilizadas](#3-ferramentas-utilizadas)
 - [4. Implementação e Hardening](#4-implementação-e-hardening)
     - [4.1 Segmentação de Rede (VLANs)](#41-segmentação-de-rede-vlans)
-    - [4.2 Configuração do Firewall (OPNsense)](#42-configuração-do-firewall-opnsense)
+    - [4.2 Configuração do Firewall (OPNsense)](#42-configuração-e-regras-de-firewall-hardening)
     - [4.3 Acesso Remoto Seguro (VPN + MFA)](#43-acesso-remoto-seguro-vpn--mfa)
-    - [4.4 Monitoramento (SOC/NOC)](#44-monitoramento-socnoc)
+    - [4.4 Monitoramento e Orquestração](#44-monitoramento-e-orquestração-docker)
 - [5. Testes e Evidências](#5-testes-e-evidências)
 - [6. Conclusão](#6-conclusão)
 
@@ -27,26 +27,26 @@
 
 ## 1. Descrição e Cenário
 
-O objetivo deste projeto foi simular a infraestrutura de uma pequena empresa que necessita elevar seu nível de maturidade em segurança. O ambiente precisava sair de uma rede "flat" (sem segregação) para uma rede segmentada e monitorada.
+O objetivo deste projeto foi simular a infraestrutura de uma pequena empresa que necessita elevar seu nível de maturidade em segurança. O ambiente precisava sair de uma rede "flat" (sem segregação) para uma rede segmentada, conteinerizada e monitorada.
 
 **Os requisitos do projeto foram:**
 1.  Isolar serviços públicos (DMZ) da rede interna (LAN).
 2.  Criar uma rede de gerenciamento (MGMT) restrita.
 3.  Permitir que administradores acessem a rede remotamente de forma segura.
-4.  Monitorar a disponibilidade e integridade dos serviços críticos.
+4.  Monitorar a disponibilidade, integridade e performance de todos os ativos.
 
 ---
 
 ## 2. Arquitetura e Topologia
 
-O laboratório foi virtualizado inteiramente no **GNS3**.
+O laboratório foi virtualizado inteiramente no **GNS3**, integrando máquinas virtuais e containers Docker.
 
 ![Topologia do Projeto](./images/topology.png)
 
 A topologia segue o modelo de defesa em profundidade:
 * **Edge:** OPNsense atuando como Firewall e Gateway.
 * **Switch Core:** Gerenciamento de VLANs (802.1Q).
-* **Endpoints:** Windows 10 (Usuário), Linux Mint (Admin), Docker (Serviços).
+* **Endpoints:** Windows 10 (Usuário), Linux Mint (Admin), Docker Hosts (Serviços e Monitoramento).
 
 ---
 
@@ -54,12 +54,12 @@ A topologia segue o modelo de defesa em profundidade:
 
 | Categoria | Ferramenta | Descrição |
 | :--- | :--- | :--- |
-| **Firewall** | OPNsense | Distribuição baseada em HardenedBSD para roteamento e firewall. |
+| **Firewall** | OPNsense | Distribuição baseada em HardenedBSD com plugin nativo de monitoramento. |
 | **Simulador** | GNS3 | Utilizado para emular o hardware de rede e conexões. |
-| **Container** | Docker | Hospedagem ágil dos serviços de aplicação e monitoramento. |
-| **Monitoramento** | Zabbix + Grafana | Coleta de métricas via SNMP e visualização de dados. |
-| **Segurança** | OpenVPN + Google Auth | VPN SSL com autenticação de dois fatores (OTP). |
-| **Alvo** | DVWA | *Damn Vulnerable Web App* usado para simular um servidor web em produção. |
+| **Orquestração** | Docker Compose | Gerenciamento de stacks de serviços e agentes via código (IaC). |
+| **Monitoramento** | Zabbix 7.0 + Grafana | Coleta de métricas (Active/Passive) e visualização de dados. |
+| **Segurança** | OpenVPN + MFA | VPN SSL com autenticação de dois fatores (OTP). |
+| **Alvo** | DVWA | *Damn Vulnerable Web App* simulando servidor de produção na DMZ. |
 
 ---
 
@@ -70,23 +70,22 @@ Para reduzir a superfície de ataque, a rede foi dividida em zonas lógicas:
 
 | ID | Nome | Subrede | Função |
 | :--- | :--- | :--- | :--- |
-| **10** | `LAN` | `10.10.10.0/24` | Rede de estações de trabalho (Windows 10). Acesso à Internet permitido, acesso à DMZ bloqueado. |
-| **20** | `DMZ` | `10.10.20.0/24` | Rede de serviços expostos (DVWA). Isolada da LAN e MGMT. |
-| **30** | `MGMT` | `10.10.30.0/24` | Rede crítica de gerenciamento. Contém o servidor Zabbix/Grafana. Acessível apenas via VPN ou Console. |
+| **10** | `LAN` | `10.10.10.0/24` | Rede de estações de trabalho. Acesso à Internet permitido, acesso à DMZ bloqueado. |
+| **20** | `DMZ` | `10.10.20.0/24` | Rede de serviços expostos (DVWA). Isolada da LAN e MGMT (com exceção de monitoramento). |
+| **30** | `MGMT` | `10.10.30.0/24` | Rede crítica de gerenciamento. Contém o stack Zabbix/Grafana. Acessível apenas via VPN ou Admin autorizado. |
 
 ### 4.2 Configuração e Regras de Firewall (Hardening)
 
-A política de segurança foi desenhada seguindo o princípio do "Least Privilege". O OPNsense implementa o **"Block All" implícito**, e apenas as seguintes conexões são explicitamente permitidas:
+A política de segurança foi desenhada seguindo o princípio do "Least Privilege". Foi aplicada uma lógica rigorosa de **"First Match"** para permitir o monitoramento sem quebrar o isolamento da DMZ:
 
 | Interface | Ação | Origem | Destino | Porta/Protocolo | Propósito |
 | :--- | :---: | :--- | :--- | :--- | :--- |
-| **DMZ** | 🚫 BLOCK | DMZ Net | LAN Net | Any | **Anti-Pivoting:** Impede que um atacante na DMZ acesse a rede de usuários. |
-| **DMZ** | 🚫 BLOCK | DMZ Net | MGMT Net | Any | **Proteção Crítica:** Impede que um atacante pivote para a rede de monitoramento (Zabbix/Grafana). |
-| **DMZ** | 🚫 BLOCK | DMZ Net | This Firewall | Any | **Gerência Segura:** Impede o acesso à interface administrativa do OPNsense. |
-| **DMZ** | ✅ ALLOW | DMZ Net | WAN Net | Any | Permite acesso à Internet para updates e comunicação externa (tráfego de saída). |
-| **DMZ** | ✅ ALLOW | DMZ Net | This Firewall | 53 (DNS/TCP) | Permite a resolução de nomes de domínio, essencial para o funcionamento dos containers. |
-
-> 🔒 **Resultado:** A DMZ só pode se comunicar com a Internet e com o DNS do Firewall, estando completamente isolada das redes internas.
+| **DMZ** | ✅ ALLOW | DVWA Host | Zabbix Server | 10051 (TCP) | **Exceção de Monitoramento:** Permite apenas o envio de métricas do Agente (Active) para o Server. |
+| **DMZ** | ✅ ALLOW | DMZ Net | This Firewall | 53 (TCP/UDP) | **Infraestrutura:** Garante resolução de DNS antes das regras de bloqueio. |
+| **DMZ** | 🚫 BLOCK | DMZ Net | MGMT Net | Any | **Proteção Crítica:** Impede acesso lateral à rede de gerenciamento. |
+| **DMZ** | 🚫 BLOCK | DMZ Net | This Firewall | Any | **Gerência Segura:** Bloqueia tentativas de acesso à GUI/SSH do Firewall. |
+| **DMZ** | 🚫 BLOCK | DMZ Net | LAN Net | Any | **Anti-Pivoting:** Isola a DMZ da rede de usuários. |
+| **DMZ** | ✅ ALLOW | DMZ Net | Any | 80, 443 (TCP) | **Saída Controlada:** Permite apenas tráfego web (updates) via Alias de portas, bloqueando portas altas/suspeitas. |
 
 ### 4.3 Acesso Remoto Seguro (VPN + MFA)
 Foi configurado um servidor **OpenVPN** dentro do OPNsense para acesso administrativo.
@@ -95,17 +94,22 @@ Foi configurado um servidor **OpenVPN** dentro do OPNsense para acesso administr
 * **Criptografia:** AES-256-CBC.
 * **Autenticação:** Usuário Local + Token OTP (Time-based One-Time Password).
 
-> 🔒 **Configuração de Segurança:** A VPN entrega uma rota estática apenas para a subrede `192.168.30.0/24` (MGMT), impedindo que o usuário da VPN acesse a LAN indevidamente.
+> 🔒 **Configuração de Segurança:** A VPN entrega uma rota estática apenas para a subrede `10.10.30.0/24` (MGMT), impedindo acesso desnecessário à LAN.
 
-### 4.4 Monitoramento (SOC/NOC)
-O stack de observabilidade foi configurado via Docker na rede de Gerência.
+### 4.4 Monitoramento e Orquestração (Docker)
 
-**Zabbix Server:**
-* Configurado host OPNsense via **SNMPv3** (mais seguro que v2).
-* Configurado host DVWA via Zabbix Agent 2.
+Todo o ambiente de monitoramento foi implantado utilizando **Docker Compose**, garantindo reprodutibilidade.
 
-**Grafana:**
-* Dashboard personalizado consumindo dados do Zabbix para visualização de tráfego de entrada/saída e uso de CPU do Firewall.
+**1. Stack de Monitoramento (VLAN MGMT):**
+* **Zabbix Server 7.0 LTS:** Backend de coleta com banco de dados MySQL.
+* **Self-Monitoring:** Implementado container `zabbix-agent` (Alpine) dentro do stack para monitorar a saúde do próprio servidor.
+
+**2. Monitoramento da DMZ (Sidecar Pattern):**
+* O servidor web (DVWA) roda acompanhado de um container **Zabbix Agent 2** no mesmo arquivo `docker-compose.yml`.
+* **Modo Active:** Devido ao bloqueio de firewall (MGMT não inicia conexões para DMZ), o agente foi configurado como **Active**, iniciando a conexão de fora para dentro na porta 10051.
+
+**3. Monitoramento do Firewall:**
+* Instalação do plugin nativo `os-zabbix-agent` (FreeBSD) no OPNsense, reportando métricas de hardware e tráfego diretamente para o servidor.
 
 ---
 
@@ -118,13 +122,13 @@ Aqui estão as comprovações do funcionamento do laboratório.
 
 ![Print da VPN pedindo token](./screenshots/vpn-mfa.png)
 
-### 📸 2. Bloqueio de Firewall (LAN vs DMZ)
-*Teste de ping falhando da DMZ para a LAN, provando o isolamento:*
+### 📸 2. Regras de Firewall e Hardening
+*Configuração de "First Match" garantindo funcionamento do Zabbix e bloqueio de movimentação lateral:*
 
-![Print do bloqueio de ping](./screenshots/ping-block.png)
+![Print das regras de firewall](./screenshots/firewall-rules.png)
 
-### 📸 3. Dashboard de Monitoramento
-*Visão geral do Grafana monitorando o tráfego do OPNsense:*
+### 📸 3. Dashboard Integrado
+*Visão do Zabbix/Grafana monitorando OPNsense, Container DVWA e o próprio Servidor:*
 
 ![Dashboard Grafana](./screenshots/grafana-dash.png)
 
@@ -132,7 +136,7 @@ Aqui estão as comprovações do funcionamento do laboratório.
 
 ## 6. Conclusão
 
-Este projeto permitiu consolidar conhecimentos em **Defesa Cibernética** e **Administração de Redes**. Foi possível demonstrar na prática como a segmentação correta e o uso de múltiplos fatores de autenticação (MFA) aumentam drasticamente a segurança de uma infraestrutura, dificultando a movimentação lateral de atacantes e garantindo visibilidade total através do monitoramento.
+Este projeto permitiu consolidar conhecimentos em **Defesa Cibernética**, **Docker** e **Redes**. O principal desafio foi orquestrar a comunicação entre containers em VLANs isoladas, exigindo configurações finas de Firewall (regras de exceção) e o uso estratégico de Zabbix Agents em modo Ativo vs Passivo. O resultado é um ambiente seguro, segmentado e com observabilidade total.
 
 ---
 
