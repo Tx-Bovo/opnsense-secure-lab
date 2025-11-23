@@ -104,8 +104,9 @@ Todo o ambiente de monitoramento foi implantado utilizando **Docker Compose**, g
 * **Zabbix Server 7.0 LTS:** Backend de coleta com banco de dados MySQL.
 * **Self-Monitoring:** Implementado container `zabbix-agent` (Alpine) dentro do stack para monitorar a saúde do próprio servidor.
 
-**2. Monitoramento da DMZ (Sidecar Pattern):**
+**2. Monitoramento da DMZ (Active Agent Pattern):**
 * O servidor web (DVWA) roda acompanhado de um container **Zabbix Agent 2** no mesmo arquivo `docker-compose.yml`.
+* **Configuração Avançada**: Utilizado network_mode: "host" e mapeamento do docker.sock para permitir que o agente monitore o host real e os containers vizinhos.
 * **Modo Active:** Devido ao bloqueio de firewall (MGMT não inicia conexões para DMZ), o agente foi configurado como **Active**, iniciando a conexão de fora para dentro na porta 10051.
 
 **3. Monitoramento do Firewall:**
@@ -120,15 +121,19 @@ Aqui estão as comprovações do funcionamento do laboratório.
 ### 📸 1. Conexão VPN com MFA
 *Demonstração do pedido de Token OTP ao conectar na VPN:*
 
-![Print da VPN pedindo token](./screenshots/vpn-mfa.png)
+![Print da VPN pedindo token](./images/dashboard-opnsense.png)
 
 ### 📸 2. Regras de Firewall e Hardening
 *Configuração de "First Match" garantindo funcionamento do Zabbix e bloqueio de movimentação lateral:*
 
 ![Print das regras de firewall](./screenshots/firewall-rules.png)
 
-### 📸 3. Dashboard Integrado
-*Visão do Zabbix/Grafana monitorando OPNsense, Container DVWA e o próprio Servidor:*
+### 📸 3. Dashboards de Operação (NOC)
+***A. Visão de Infraestrutura (OPNsense):** Foco em saúde do hardware (CPU/RAM) e fluxo de tráfego de rede (WAN/LAN/DMZ).*
+
+![Dashboard Grafana](./screenshots/grafana-dash.png)
+
+***B. Visão de Serviço (DVWA):** Monitoramento focado na aplicação: Disponibilidade HTTP (Status 200) e saúde do container Docker.*
 
 ![Dashboard Grafana](./screenshots/grafana-dash.png)
 
