@@ -135,7 +135,7 @@ Aqui estão as comprovações do funcionamento do laboratório.
 
 ***B. Visão de Serviço (DVWA):** Monitoramento focado na aplicação: Disponibilidade HTTP (Status 200) e saúde do container Docker.*
 
-![Dashboard Grafana](./screenshots/grafana-dash.png)
+![Dashboard Grafana](./images/dashboard-dvwa.png)
 
 ---
 
