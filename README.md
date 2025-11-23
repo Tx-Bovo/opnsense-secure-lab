@@ -121,7 +121,7 @@ Aqui estão as comprovações do funcionamento do laboratório.
 ### 📸 1. Conexão VPN com MFA
 *Demonstração do pedido de Token OTP ao conectar na VPN:*
 
-![Print da VPN pedindo token](./images/dashboard-opnsense.png)
+![Print da VPN pedindo token](./images/)
 
 ### 📸 2. Regras de Firewall e Hardening
 *Configuração de "First Match" garantindo funcionamento do Zabbix e bloqueio de movimentação lateral:*
@@ -131,7 +131,7 @@ Aqui estão as comprovações do funcionamento do laboratório.
 ### 📸 3. Dashboards de Operação (NOC)
 ***A. Visão de Infraestrutura (OPNsense):** Foco em saúde do hardware (CPU/RAM) e fluxo de tráfego de rede (WAN/LAN/DMZ).*
 
-![Dashboard Grafana](./screenshots/grafana-dash.png)
+![Dashboard Grafana](./images/dashboard-opnsense.png)
 
 ***B. Visão de Serviço (DVWA):** Monitoramento focado na aplicação: Disponibilidade HTTP (Status 200) e saúde do container Docker.*
 
