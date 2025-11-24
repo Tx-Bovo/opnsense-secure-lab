@@ -101,6 +101,8 @@ A segmentação lógica foi materializada na camada de enlace através da config
 
 A política de segurança foi desenhada seguindo o princípio do "Least Privilege". Foi aplicada uma lógica rigorosa de **"First Match"** para permitir o monitoramento sem quebrar o isolamento da DMZ:
 
+#### A. Regras da DMZ (Serviços Expostos)
+
 | Interface | Ação | Origem | Destino | Porta/Protocolo | Propósito |
 | :--- | :---: | :--- | :--- | :--- | :--- |
 | **DMZ** | ✅ ALLOW | DVWA Host | Zabbix Server | 10051 (TCP) | **Exceção de Monitoramento:** Permite apenas o envio de métricas do Agente (Active) para o Server. |
@@ -109,6 +111,26 @@ A política de segurança foi desenhada seguindo o princípio do "Least Privileg
 | **DMZ** | 🚫 BLOCK | DMZ Net | This Firewall | Any | **Gerência Segura:** Bloqueia tentativas de acesso à GUI/SSH do Firewall. |
 | **DMZ** | 🚫 BLOCK | DMZ Net | LAN Net | Any | **Anti-Pivoting:** Isola a DMZ da rede de usuários. |
 | **DMZ** | ✅ ALLOW | DMZ Net | Any | 80, 443 (TCP) | **Saída Controlada:** Permite apenas tráfego web (updates) via Alias de portas, bloqueando portas altas/suspeitas. |
+
+
+![Print das regras de firewall](https://github.com/user-attachments/assets/8072bc4f-d8b8-4b2e-86c0-8906e6b2f174)
+*(Foco em isolamento, contenção e Anti-Pivoting.)*
+
+#### B. Regras da MGMT (Gerência e Monitoramento)
+A rede de Gerência é considerada uma **Trusted Zone**, mas o acesso foi granularizado para garantir que apenas protocolos de administração e monitoramento circulem.
+
+| Ação | Origem | Destino | Porta/Protocolo | Propósito |
+| :---: | :--- | :--- | :--- | :--- |
+| ✅ PASS | MGMT Net | **This Firewall** | 53 (DNS) | Resolução de nomes para os servidores de monitoramento. |
+| ✅ PASS | MGMT Net | **This Firewall** | 80, 443, 22 | Acesso administrativo à GUI e SSH do OPNsense. |
+| ✅ PASS | MGMT Net | **This Firewall** | 161, 10050 | Coleta de métricas do Firewall (SNMP e Zabbix Agent). |
+| ✅ PASS | MGMT Net | **DMZ Net** | HTTP/TCP | Permite *Web Scenarios* (Health Check) do Zabbix no DVWA. |
+| ✅ PASS | MGMT Net | **WAN Net** | Any | Acesso à Internet para updates e download de pacotes/imagens Docker. |
+
+![Regras de Firewall MGMT](https://github.com/user-attachments/assets/c0bf2a20-ebd7-470e-b986-3832753a800c)
+*(Configuração permitindo o fluxo de monitoramento e administração)*
+
+---
 
 ### 4.4 Acesso Remoto Seguro (VPN + MFA)
 
@@ -147,7 +169,7 @@ Todo o ambiente de monitoramento foi implantado utilizando **Docker Compose**, g
 
 **2. Monitoramento da DMZ (Active Agent Pattern):**
 * O servidor web (DVWA) roda acompanhado de um container **Zabbix Agent 2** no mesmo arquivo `docker-compose.yml`.
-* **Configuração Avançada**: Utilizado network_mode: "host" e mapeamento do docker.sock para permitir que o agente monitore o host real e os containers vizinhos.
+* **Configuração Avançada:** Utilizado network_mode: "host" e mapeamento do docker.sock para permitir que o agente monitore o host real e os containers vizinhos.
 * **Modo Active:** Devido ao bloqueio de firewall (MGMT não inicia conexões para DMZ), o agente foi configurado como **Active**, iniciando a conexão de fora para dentro na porta 10051.
 
 **3. Monitoramento do Firewall:**
