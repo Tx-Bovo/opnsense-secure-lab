@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # --- Aplicação Alvo (Vulnerável) ---
+  dvwa:
+    image: vulnerables/web-dvwa
+    container_name: dvwa
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./dvwa-logs:/var/log/apache2 # Mapeamento local relativo para portabilidade
+    networks:
+      - dvwa-net
+
+  # --- Zabbix Agent (Sidecar de Monitoramento) ---
+  zabbix-agent:
+    image: zabbix/zabbix-agent2:alpine-7.0-latest
+    container_name: zabbix-agent-dvwa
+    restart: always
+    privileged: true
+    user: root
+
+    # --- Configuração Avançada de Sidecar ---
+    # Compartilha o PID Namespace com o DVWA para visualizar processos (Apache/MySQL)
+    pid: "service:dvwa"
+    # Compartilha a Stack de Rede com o DVWA para medir tráfego real da interface
+    network_mode: "service:dvwa"
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # Permite monitorar o status do Docker
+      - /etc/localtime:/etc/localtime:ro # Sincronização de Timezone (Vital para Active Checks)
+      - /etc/timezone:/etc/timezone:ro
+
+    environment:
+      - ZBX_HOSTNAME=${ZABBIX_HOSTNAME}
+      - ZBX_SERVER_HOST=${ZABBIX_SERVER_IP}
+      - ZBX_SERVER_PORT=10051
+      - ZBX_SERVERACTIVE=${ZABBIX_SERVER_IP}:10051 # Configuração para Modo Ativo
+
+networks:
+  dvwa-net:
+    driver: bridge
