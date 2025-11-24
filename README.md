@@ -240,6 +240,6 @@ Este projeto permitiu consolidar conhecimentos em **Defesa Cibernética**, **Doc
 
 Os arquivos de configuração essenciais estão disponíveis neste repositório:
 
-* `/zabbix-docker`: Contém o `docker-compose.yml` do servidor de monitoramento.
-* `/dvwa-docker`: Contém a configuração do agente ativo e da aplicação vulnerável (também `docker-compose.yml`).
+* `/zabbix_grafana`: Contém o `docker-compose.yml` do servidor de monitoramento.
+* `/dvwa`: Contém a configuração do agente ativo e da aplicação vulnerável (também `docker-compose.yml`).
 * `/configs`: Backups sanitizados das regras do OPNsense (XML).
