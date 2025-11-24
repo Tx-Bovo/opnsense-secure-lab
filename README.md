@@ -235,3 +235,11 @@ Após analisar os logs do servidor e comparar os ambientes, identificou-se um **
 ## 7. Conclusão
 
 Este projeto permitiu consolidar conhecimentos em **Defesa Cibernética**, **Docker** e **Redes**. O principal desafio foi orquestrar a comunicação entre containers em VLANs isoladas, exigindo configurações finas de Firewall (regras de exceção) e o uso estratégico de Zabbix Agents em modo Ativo vs Passivo. O resultado é um ambiente seguro, segmentado e com observabilidade total.
+
+## 🛠️ Como Reproduzir (Arquivos)
+
+Os arquivos de configuração essenciais estão disponíveis neste repositório:
+
+* `/zabbix-docker`: Contém o `docker-compose.yml` do servidor de monitoramento.
+* `/dvwa-docker`: Contém a configuração do agente ativo e da aplicação vulnerável (também `docker-compose.yml`).
+* `/configs`: Backups sanitizados das regras do OPNsense (XML).
