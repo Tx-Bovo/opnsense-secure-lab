@@ -1,0 +1,147 @@
+<opnsense-export>
+  <nat>
+    <rule>
+      <descr>Redirect WAN HTTP to DVWA Host</descr>
+      <interface>wan</interface>
+      <protocol>tcp</protocol>
+      <source>
+        <any>1</any>
+      </source>
+      <destination>
+        <network>wanip</network>
+        <port>80</port>
+      </destination>
+      <target>10.10.20.38</target>
+      <local-port>80</local-port>
+    </rule>
+  </nat>
+
+  <filter>
+    
+    <rule>
+      <descr>Allow Access to DVWA (NAT Reflection)</descr>
+      <type>pass</type>
+      <interface>wan</interface>
+      <protocol>tcp</protocol>
+      <source><any>1</any></source>
+      <destination>
+        <address>10.10.20.38</address>
+        <port>80</port>
+      </destination>
+    </rule>
+
+    <rule>
+      <descr>Block Access to Management VLAN (Segregation)</descr>
+      <type>block</type>
+      <interface>lan</interface>
+      <source><network>lan</network></source>
+      <destination><network>opt2</network></destination>
+    </rule>
+    <rule>
+      <descr>Default Allow LAN to Internet</descr>
+      <type>pass</type>
+      <interface>lan</interface>
+      <source><network>lan</network></source>
+      <destination><any>1</any></destination>
+    </rule>
+
+    <rule>
+      <descr>Allow DNS internal</descr>
+      <type>pass</type>
+      <interface>openvpn</interface>
+      <protocol>tcp/udp</protocol>
+      <source><network>openvpn</network></source>
+      <destination>
+        <network>(self)</network>
+        <port>53</port>
+      </destination>
+    </rule>
+    <rule>
+      <descr>Access Admin (Zabbix, SSH, Dashboards)</descr>
+      <type>pass</type>
+      <interface>openvpn</interface>
+      <source><network>openvpn</network></source>
+      <destination><network>opt2</network></destination>
+    </rule>
+    <rule>
+      <descr>Access OPNsense GUI</descr>
+      <type>pass</type>
+      <interface>openvpn</interface>
+      <protocol>tcp</protocol>
+      <destination>
+        <network>(self)</network>
+        <port>8443</port>
+      </destination>
+    </rule>
+    <rule>
+      <descr>Anti-Pivoting Block (VPN to LAN/DMZ)</descr>
+      <type>block</type>
+      <interface>openvpn</interface>
+      <destination>
+        <address>opt1,lan</address>
+      </destination>
+    </rule>
+
+    <rule>
+      <descr>Allow Zabbix Agent to Server (Active Check)</descr>
+      <type>pass</type>
+      <interface>opt1</interface>
+      <protocol>tcp</protocol>
+      <source><address>DVWA_SERVER</address></source>
+      <destination>
+        <address>ZABBIX_SERVER</address>
+        <port>10051</port>
+      </destination>
+    </rule>
+    <rule>
+      <descr>Allow NTP for Time Sync</descr>
+      <type>pass</type>
+      <interface>opt1</interface>
+      <protocol>udp</protocol>
+      <source><address>DVWA_SERVER</address></source>
+      <destination>
+        <network>(self)</network>
+        <port>123</port>
+      </destination>
+    </rule>
+    <rule>
+      <descr>Block DMZ to MGMT (Anti-Pivoting)</descr>
+      <type>block</type>
+      <interface>opt1</interface>
+      <destination><network>opt2</network></destination>
+    </rule>
+    <rule>
+      <descr>Allow access to internet (OUT)</descr>
+      <type>pass</type>
+      <interface>opt1</interface>
+      <destination>
+        <any>1</any>
+        <port>WEB_PORTS</port>
+      </destination>
+    </rule>
+
+    <rule>
+      <descr>ALLOW Zabbix Server to monitor DVWA via HTTP</descr>
+      <type>pass</type>
+      <interface>opt2</interface>
+      <source><address>ZABBIX_SERVER</address></source>
+      <destination>
+        <address>DVWA_SERVER</address>
+        <port>80</port>
+      </destination>
+    </rule>
+    <rule>
+      <descr>Allow Management Traffic (SNMP, Agent, SSH, GUI)</descr>
+      <type>pass</type>
+      <interface>opt2</interface>
+      <destination><network>(self)</network></destination>
+    </rule>
+    <rule>
+      <descr>Allow MGMT to WAN traffic</descr>
+      <type>pass</type>
+      <interface>opt2</interface>
+      <destination><network>wan</network></destination>
+    </rule>
+
+  </filter>
+</opnsense-export>
