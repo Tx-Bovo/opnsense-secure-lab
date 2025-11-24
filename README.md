@@ -88,13 +88,31 @@ A política de segurança foi desenhada seguindo o princípio do "Least Privileg
 | **DMZ** | ✅ ALLOW | DMZ Net | Any | 80, 443 (TCP) | **Saída Controlada:** Permite apenas tráfego web (updates) via Alias de portas, bloqueando portas altas/suspeitas. |
 
 ### 4.3 Acesso Remoto Seguro (VPN + MFA)
-Foi configurado um servidor **OpenVPN** dentro do OPNsense para acesso administrativo.
 
-* **Protocolo:** UDP/1194.
-* **Criptografia:** AES-256-CBC.
-* **Autenticação:** Usuário Local + Token OTP (Time-based One-Time Password).
+Para garantir a administração segura do ambiente fora do perímetro local, foi implementado um servidor **OpenVPN** no OPNsense. A configuração prioriza confidencialidade e integridade, utilizando criptografia forte e autenticação multifator.
 
-> 🔒 **Configuração de Segurança:** A VPN entrega uma rota estática apenas para a subrede `10.10.30.0/24` (MGMT), impedindo acesso desnecessário à LAN.
+**Especificações do Túnel:**
+* **Protocolo:** UDP/1194 (Tun Layer 3).
+* **Criptografia de Dados:** AES-256-CBC.
+* **Algoritmo de Hash (Auth):** SHA512.
+* **Autenticação:** Usuário Local + **Token OTP** (Time-based One-Time Password via Google Authenticator).
+
+#### Política de Acesso (Zero Trust)
+A VPN foi configurada estritamente como um canal de **Gerenciamento (Management Plane)**. Diferente de VPNs convencionais que dão acesso total à rede, este túnel implementa uma política de bloqueio padrão:
+
+| Origem | Destino | Ação | Justificativa |
+| :--- | :--- | :--- | :--- |
+| **VPN Clients** | **MGMT Net (VLAN30)** | ✅ ALLOW | Permite acesso ao Zabbix, Dashboards e terminais de administração. |
+| **VPN Clients** | **Firewall (Self)** | ✅ ALLOW | Permite acesso restrito a DNS (53), GUI (8443) e SSH (22). |
+| **VPN Clients** | **LAN / DMZ** | 🚫 BLOCK | **Anti-Pivoting:** Impede que um administrador comprometido tenha acesso direto a estações de trabalho ou servidores de produção. |
+
+> 🔒 **Estratégia de Segurança:** O tráfego de produção (acesso ao site DVWA) ocorre publicamente via WAN (NAT). A VPN é isolada e exclusiva para a equipe de operações (NOC/SecOps), reduzindo drasticamente a superfície de ataque interna.
+
+![Regras de Firewall da VPN](./images/vpn-rules.png)
+
+*(Configuração de regras no OPNsense demonstrando o acesso restrito)*
+
+
 
 ### 4.4 Monitoramento e Orquestração (Docker)
 
