@@ -130,6 +130,16 @@ A rede de Gerência é considerada uma **Trusted Zone**, mas o acesso foi granul
 ![Regras de Firewall MGMT](https://github.com/user-attachments/assets/c0bf2a20-ebd7-470e-b986-3832753a800c)
 *(Configuração permitindo o fluxo de monitoramento e administração)*
 
+
+#### C. Regras da LAN (Usuários)
+*Foco em proteção dos ativos de produção.*
+
+| Ação | Origem | Destino | Propósito |
+| :---: | :--- | :--- | :--- |
+| 🚫 BLOCK | LAN Net | MGMT Net | **Segurança:** Impede que usuários acessem a rede de administração. |
+| ✅ PASS | LAN Net | Any | Acesso à Internet e serviços DMZ. |
+
+
 ---
 
 ### 4.4 Acesso Remoto Seguro (VPN + MFA)
