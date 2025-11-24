@@ -21,7 +21,8 @@
     - [4.3 Acesso Remoto Seguro (VPN + MFA)](#43-acesso-remoto-seguro-vpn--mfa)
     - [4.4 Monitoramento e Orquestração](#44-monitoramento-e-orquestração-docker)
 - [5. Testes e Evidências](#5-testes-e-evidências)
-- [6. Conclusão](#6-conclusão)
+- [6. Desafios e Troubleshooting](#6-desafios-e-troubleshooting)
+- [7. Conclusão](#7-conclusão)
 
 ---
 
@@ -157,7 +158,27 @@ Aqui estão as comprovações do funcionamento do laboratório.
 
 ---
 
-## 6. Conclusão
+## 6. Desafios e Troubleshooting
+
+Durante a implementação do monitoramento na DMZ, um desafio técnico complexo foi encontrado e solucionado.
+
+### 🔧 O Problema: Falha Silenciosa do Agente Ativo
+O Zabbix Agent no container DVWA (DMZ) parou de enviar dados para o servidor, embora os testes de conectividade (ping/netcat) na porta 10051 estivessem funcionando e não houvesse erros explícitos de conexão nos logs.
+
+### 🕵️ Diagnóstico
+Após analisar os logs do servidor e comparar os ambientes, identificou-se um **Time Drift (Dessincronização de Relógio)** severo de 17 horas entre o container na DMZ e o Zabbix Server.
+* **Causa Raiz:** As regras de *Hardening* do Firewall bloqueavam todo o tráfego de saída da DMZ, exceto HTTP/HTTPS. Isso impedia o container de consultar servidores NTP (Network Time Protocol) na porta **UDP 123** para ajustar a hora.
+* **Impacto:** O Zabbix Server descartava silenciosamente os dados recebidos do agente, pois os considerava "dados do passado" (timestamp inválido).
+
+### ✅ Solução Implementada
+1.  **Firewall:** Criada uma regra de exceção na interface DMZ permitindo tráfego **UDP/123** com destino ao Gateway (OPNsense), que atua como servidor NTP local.
+2.  **Docker:** Mapeamento dos volumes `/etc/localtime` e `/etc/timezone` no container para garantir que ele herde a hora correta do host sincronizado.
+
+> **Lição Aprendida:** Em ambientes isolados e conteinerizados, a sincronização de tempo (NTP) é um vetor crítico para a integridade de logs e monitoramento distribuído.
+
+---
+
+## 7. Conclusão
 
 Este projeto permitiu consolidar conhecimentos em **Defesa Cibernética**, **Docker** e **Redes**. O principal desafio foi orquestrar a comunicação entre containers em VLANs isoladas, exigindo configurações finas de Firewall (regras de exceção) e o uso estratégico de Zabbix Agents em modo Ativo vs Passivo. O resultado é um ambiente seguro, segmentado e com observabilidade total.
 
