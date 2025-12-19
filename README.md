@@ -1,4 +1,4 @@
-# 🛡️ Projeto de Infraestrutura e Segurança (NOC)
+# 🛡️ Projeto de Infraestrutura (NOC)
 
 ![Status](https://img.shields.io/badge/Status-Conclu%C3%ADdo-success?style=for-the-badge&logo=appveyor)
 ![OPNsense](https://img.shields.io/badge/Firewall-OPNsense-orange?style=for-the-badge)
