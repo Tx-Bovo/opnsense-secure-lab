@@ -1,4 +1,4 @@
-# 🛡️ Projeto de Infraestrutura (NOC)
+# 🛡️ Projeto de Infraestrutura e Monitoramento de Redes
 
 ![Status](https://img.shields.io/badge/Status-Conclu%C3%ADdo-success?style=for-the-badge&logo=appveyor)
 ![OPNsense](https://img.shields.io/badge/Firewall-OPNsense-orange?style=for-the-badge)
@@ -6,7 +6,7 @@
 ![Docker](https://img.shields.io/badge/Orchestration-Docker_Compose-blue?style=for-the-badge&logo=docker)
 ![GNS3](https://img.shields.io/badge/Lab-GNS3-lightgrey?style=for-the-badge)
 
-> Um laboratório prático de implementação de segurança de rede, segmentação, VPN com MFA e monitoramento contínuo (NOC).
+> Implementação de ambiente corporativo simulado com segmentação de rede (VLANs), firewall OPNsense, VPN segura e monitoramento contínuo com Zabbix e Grafana. Experiência prática em troubleshooting, políticas de acesso, Docker e documentação técnica.
 
 ---
 
